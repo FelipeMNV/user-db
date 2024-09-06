@@ -11,7 +11,7 @@ class Config:
 class ProductionConfig(Config):
     TESTING = False
     SECRET_KEY = "n#$>94JAb;_}@hRMeYLE6"
-    SQLALCHEMY_DATABASE_URI = "postgresql://felipe:w3ATnTZrE3lRqT2qPxWvCo4yBZDaExEM@dpg-crbdrnjtq21c73chjrjg-a/fbank"
+    SQLALCHEMY_DATABASE_URI = "postgresql://felipe:w3ATnTZrE3lRqT2qPxWvCo4yBZDaExEM@dpg-crbdrnjtq21c73chjrjg-a.oregon-postgres.render.com:5432/fbank"
     JWT_SECRET_KEY = "Y5n;g[cmCK9Z:.t/s{,yWN"
 
 
