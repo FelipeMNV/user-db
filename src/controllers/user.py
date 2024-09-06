@@ -1,9 +1,10 @@
 from flask import Blueprint, request
-from src.app import User, db
+from src.models import User, db
 from http import HTTPStatus
 from src.utils import requires_role
 from sqlalchemy import inspect
 from flask_jwt_extended import jwt_required
+from src.app import bcrypt
 
 bp = Blueprint("user", __name__, url_prefix="/users")
 
@@ -12,7 +13,7 @@ def _create_user():
     data = request.json
     user = User(
         username=data["username"],
-        password=data["password"],
+        password=bcrypt.generate_password_hash(data["password"]),
         role_id=data["role_id"],
     )
     db.session.add(user)
@@ -33,18 +34,19 @@ def _list_users():
 
 
 @bp.route("/", methods=["GET", "POST"])
-@jwt_required()
-@requires_role("admin")
 def list_or_create_user():
-
     if request.method == "POST":
+        # Criação de usuário não requer autenticação
         _create_user()
         return {"message": "User created"}, HTTPStatus.CREATED
     else:
+        # Listar usuários requer autenticação
+        jwt_required()
         return {"users": _list_users()}
 
 
 @bp.route("/<int:user_id>")
+@jwt_required()
 def get_user(user_id):
     user = db.get_or_404(User, user_id)
     return [
@@ -56,6 +58,8 @@ def get_user(user_id):
 
 
 @bp.route("/<int:user_id>", methods=["PATCH"])
+@jwt_required()
+@requires_role("admin")
 def update_user(user_id):
     user = db.get_or_404(User, user_id)
     data = request.json
@@ -75,6 +79,8 @@ def update_user(user_id):
 
 
 @bp.route("/<int:user_id>", methods=["DELETE"])
+@jwt_required()
+@requires_role("admin")
 def delete_user(user_id):
     user = db.get_or_404(User, user_id)
     db.session.delete(user)
